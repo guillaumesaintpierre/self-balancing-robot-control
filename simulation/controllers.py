@@ -89,3 +89,44 @@ if __name__ == "__main__":
         f"Torque limit = "
         f"{controller.torque_limit:.3f} N.m"
     )
+@dataclass
+class PositionVelocityController:
+    """Outer-loop controller for position and velocity."""
+
+    position_gain: float = 0.10
+    velocity_gain: float = 0.10
+    angle_limit_deg: float = 5.0
+
+    def compute_theta_ref(
+        self,
+        position,
+        velocity,
+        position_ref=0.0,
+        velocity_ref=0.0,
+    ):
+        """
+        Compute desired body angle.
+
+        Positive position/velocity error produces
+        a corrective backward lean.
+        """
+
+        position_error = position - position_ref
+        velocity_error = velocity - velocity_ref
+
+        theta_ref = (
+            -self.position_gain * position_error
+            -self.velocity_gain * velocity_error
+        )
+
+        angle_limit = np.deg2rad(
+            self.angle_limit_deg
+        )
+
+        return float(
+            np.clip(
+                theta_ref,
+                -angle_limit,
+                angle_limit,
+            )
+        )
