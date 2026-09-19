@@ -10,7 +10,6 @@ from simulation.dynamics import linear_state_space
 
 @dataclass
 class LQRController:
-
     gain: np.ndarray
     torque_limit: float = 0.6
 
@@ -19,14 +18,12 @@ class LQRController:
         state,
         reference=None,
     ):
-
         state = np.asarray(
             state,
             dtype=float,
         )
 
         if reference is None:
-
             reference = np.zeros(4)
 
         error = (
@@ -50,22 +47,29 @@ class LQRController:
         )
 
 
-def design_lqr():
+def design_lqr(
+    q_position=30.0,
+    q_velocity=3.0,
+    q_angle=100.0,
+    q_angular_velocity=5.0,
+    r_torque=1000.0,
+):
+    """Design continuous-time LQR controller."""
 
     A, B = linear_state_space()
 
     Q = np.diag(
         [
-            10.0,   # position
-            1.0,    # velocity
-            100.0,  # angle
-            5.0,    # angular velocity
+            q_position,
+            q_velocity,
+            q_angle,
+            q_angular_velocity,
         ]
     )
 
     R = np.array(
         [
-            [1000.0]
+            [r_torque]
         ]
     )
 
@@ -88,7 +92,6 @@ def design_lqr():
 
 
 def main():
-
     A, B = linear_state_space()
 
     controller = design_lqr()
@@ -108,7 +111,6 @@ def main():
     )
 
     print("\nGain K:")
-
     print(K)
 
     print(
@@ -116,7 +118,6 @@ def main():
     )
 
     for value in eigenvalues:
-
         print(
             f"{value:.6f}"
         )
@@ -124,7 +125,6 @@ def main():
     if np.all(
         np.real(eigenvalues) < 0
     ):
-
         print(
             "\nCLOSED-LOOP SYSTEM IS STABLE"
         )
